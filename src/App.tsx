@@ -1,47 +1,52 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable @typescript-eslint/indent */
-/* eslint-disable padding-line-between-statements */
+/* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
 import { getTodos } from './api/todos';
 import { TodoList } from './components/TodoList';
 import { UserWarning } from './UserWarning';
 import { Loader } from './components/Loader';
 import { Todo } from './types/Todo';
+import classNames from 'classnames';
+
 // Replace this with your actual user ID
 const USER_ID = 123;
+
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showError, setShowError] = useState(false);
   const [filterStatus, setFilterStatus] = useState<
-    'all' | 'active' | 'completed'
+  'all' | 'active' | 'completed'
   >('all');
-  useEffect(() => {
-    if (USER_ID) {
-      loadTodos();
-    } else {
-      setShowError(true);
-    }
-    return () => {
-      setErrorMessage(''); // Clear error message on unmount
-    };
-  }, []);
+
   const loadTodos = async () => {
     setIsLoading(true);
     setErrorMessage('');
     setShowError(false);
     try {
       const loadedTodos = await getTodos();
+
       setTodos(loadedTodos);
     } catch (error) {
       setErrorMessage('Unable to load todos');
-      // Set a timeout to show the error after a delay
       setShowError(true);
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (USER_ID) {
+      loadTodos();
+    } else {
+      setShowError(true);
+    }
+
+    return () => {
+      setErrorMessage('');
+    };
+  }, []);
+
   const filteredTodos = todos.filter(todo => {
     switch (filterStatus) {
       case 'active':
@@ -52,10 +57,13 @@ export const App: React.FC = () => {
         return true;
     }
   });
+
   if (!USER_ID) {
     setShowError(true);
+
     return <UserWarning />;
   }
+
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
@@ -64,7 +72,9 @@ export const App: React.FC = () => {
           {todos.length > 0 && (
             <button
               type="button"
-              className={`todoapp__toggle-all ${todos.every(todo => todo.completed) ? 'active' : ''}`}
+              className={classNames('todoapp__toggle-all', {
+                active: todos.every(todo => todo.completed),
+              })}
               data-cy="ToggleAllButton"
             />
           )}
@@ -86,30 +96,32 @@ export const App: React.FC = () => {
               {todos.filter(todo => !todo.completed).length} items left
             </span>
             <nav className="filter" data-cy="Filter">
-              <a
-                href="#/"
-                className={`filter__link ${filterStatus === 'all' ? 'selected' : ''}`}
-                data-cy="FilterLinkAll"
-                onClick={() => setFilterStatus('all')}
-              >
-                All
-              </a>
-              <a
-                href="#/active"
-                className={`filter__link ${filterStatus === 'active' ? 'selected' : ''}`}
-                data-cy="FilterLinkActive"
-                onClick={() => setFilterStatus('active')}
-              >
-                Active
-              </a>
-              <a
-                href="#/completed"
-                className={`filter__link ${filterStatus === 'completed' ? 'selected' : ''}`}
-                data-cy="FilterLinkCompleted"
-                onClick={() => setFilterStatus('completed')}
-              >
-                Completed
-              </a>
+              <nav className="filter" data-cy="Filter">
+                <a
+                  href="#/"
+                  className={`filter__link ${filterStatus === 'all' ? 'selected' : ''}`}
+                  data-cy="FilterLinkAll"
+                  onClick={() => setFilterStatus('all')}
+                >
+                  All
+                </a>
+                <a
+                  href="#/active"
+                  className={`filter__link ${filterStatus === 'active' ? 'selected' : ''}`}
+                  data-cy="FilterLinkActive"
+                  onClick={() => setFilterStatus('active')}
+                >
+                  Active
+                </a>
+                <a
+                  href="#/completed"
+                  className={`filter__link ${filterStatus === 'completed' ? 'selected' : ''}`}
+                  data-cy="FilterLinkCompleted"
+                  onClick={() => setFilterStatus('completed')}
+                >
+                  Completed
+                </a>
+              </nav>
             </nav>
             {todos.some(todo => todo.completed) && (
               <button
@@ -125,7 +137,13 @@ export const App: React.FC = () => {
       </div>
       <div
         data-cy="ErrorNotification"
-        className={`notification is-danger is-light has-text-weight-normal ${showError ? '' : 'hidden'}`}
+        className={classNames(
+          'notification',
+          'is-danger',
+          'is-light',
+          'has-text-weight-normal',
+          { hidden: !showError },
+        )}
       >
         <button
           data-cy="HideErrorButton"
@@ -136,7 +154,20 @@ export const App: React.FC = () => {
             setShowError(false);
           }}
         />
-        {errorMessage}
+        {errorMessage && (
+          <div
+            data-cy="ErrorNotification"
+            className="notification is-danger is-light has-text-weight-normal"
+          >
+            <button
+              data-cy="HideErrorButton"
+              type="button"
+              className="delete"
+              onClick={() => setErrorMessage('')}
+            />
+            {errorMessage}
+          </div>
+        )}
       </div>
     </div>
   );
