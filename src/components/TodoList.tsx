@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { Todo } from '../types/Todo';
+import classNames from 'classnames';
 
 interface Props {
   todos: Todo[];
@@ -8,24 +9,24 @@ interface Props {
 
 export const TodoList: React.FC<Props> = ({ todos }) => (
   <>
-    {todos.map(todo => (
+    {todos.map(({ id, completed, title }) => (
       <div
-        key={todo.id}
+        key={id}
         data-cy="Todo"
-        className={`todo ${todo.completed ? 'completed' : ''}`}
+        className={classNames('todo', { completed })}
       >
-        <label className="todo__status-label" htmlFor={`todo-${todo.id}`}>
+        <label className="todo__status-label" htmlFor={`todo-${id}`}>
           <input
-            id={`todo-${todo.id}`}
+            id={`todo-${id}`}
             data-cy="TodoStatus"
             type="checkbox"
             className="todo__status"
-            checked={todo.completed}
+            checked={completed}
           />
         </label>
 
         <span data-cy="TodoTitle" className="todo__title">
-          {todo.title}
+          {title}
         </span>
 
         <button type="button" className="todo__remove" data-cy="TodoDelete">

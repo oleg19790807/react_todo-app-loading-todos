@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
 import { getTodos } from './api/todos';
 import { TodoList } from './components/TodoList';
@@ -6,18 +5,25 @@ import { UserWarning } from './UserWarning';
 import { Loader } from './components/Loader';
 import { Todo } from './types/Todo';
 import classNames from 'classnames';
+import { Footer } from './components/Footer'; // Import the Footer component
 
 // Replace this with your actual user ID
 const USER_ID = 123;
+
+enum FilterStatus {
+  All = 'all',
+  Active = 'active',
+  Completed = 'completed',
+}
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showError, setShowError] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<
-  'all' | 'active' | 'completed'
-  >('all');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>(
+    FilterStatus.All,
+  );
 
   const loadTodos = async () => {
     setIsLoading(true);
@@ -49,9 +55,9 @@ export const App: React.FC = () => {
 
   const filteredTodos = todos.filter(todo => {
     switch (filterStatus) {
-      case 'active':
+      case FilterStatus.Active:
         return !todo.completed;
-      case 'completed':
+      case FilterStatus.Completed:
         return todo.completed;
       default:
         return true;
@@ -91,48 +97,11 @@ export const App: React.FC = () => {
           {isLoading ? <Loader /> : <TodoList todos={filteredTodos} />}
         </section>
         {todos.length > 0 && (
-          <footer className="todoapp__footer" data-cy="Footer">
-            <span className="todo-count" data-cy="TodosCounter">
-              {todos.filter(todo => !todo.completed).length} items left
-            </span>
-            <nav className="filter" data-cy="Filter">
-              <nav className="filter" data-cy="Filter">
-                <a
-                  href="#/"
-                  className={`filter__link ${filterStatus === 'all' ? 'selected' : ''}`}
-                  data-cy="FilterLinkAll"
-                  onClick={() => setFilterStatus('all')}
-                >
-                  All
-                </a>
-                <a
-                  href="#/active"
-                  className={`filter__link ${filterStatus === 'active' ? 'selected' : ''}`}
-                  data-cy="FilterLinkActive"
-                  onClick={() => setFilterStatus('active')}
-                >
-                  Active
-                </a>
-                <a
-                  href="#/completed"
-                  className={`filter__link ${filterStatus === 'completed' ? 'selected' : ''}`}
-                  data-cy="FilterLinkCompleted"
-                  onClick={() => setFilterStatus('completed')}
-                >
-                  Completed
-                </a>
-              </nav>
-            </nav>
-            {todos.some(todo => todo.completed) && (
-              <button
-                type="button"
-                className="todoapp__clear-completed"
-                data-cy="ClearCompletedButton"
-              >
-                Clear completed
-              </button>
-            )}
-          </footer>
+          <Footer
+            todos={todos}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+          />
         )}
       </div>
       <div
