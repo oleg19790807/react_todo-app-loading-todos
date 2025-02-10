@@ -5,22 +5,19 @@ import { UserWarning } from './UserWarning';
 import { Loader } from './components/Loader';
 import { Todo } from './types/Todo';
 import classNames from 'classnames';
-import { Footer } from './components/Footer'; // Import the Footer component
+import { Footer } from './components/Footer';
+import FilterStatus from './enums/FilterStatus';
 
-// Replace this with your actual user ID
 const USER_ID = 123;
 
-enum FilterStatus {
-  All = 'all',
-  Active = 'active',
-  Completed = 'completed',
-}
+const hideError = () => {
+  setErrorMessage('');
+};
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [showError, setShowError] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>(
     FilterStatus.All,
   );
@@ -28,14 +25,12 @@ export const App: React.FC = () => {
   const loadTodos = async () => {
     setIsLoading(true);
     setErrorMessage('');
-    setShowError(false);
     try {
       const loadedTodos = await getTodos();
 
       setTodos(loadedTodos);
     } catch (error) {
       setErrorMessage('Unable to load todos');
-      setShowError(true);
     } finally {
       setIsLoading(false);
     }
@@ -44,8 +39,6 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (USER_ID) {
       loadTodos();
-    } else {
-      setShowError(true);
     }
 
     return () => {
@@ -65,8 +58,6 @@ export const App: React.FC = () => {
   });
 
   if (!USER_ID) {
-    setShowError(true);
-
     return <UserWarning />;
   }
 
@@ -104,40 +95,25 @@ export const App: React.FC = () => {
           />
         )}
       </div>
-      <div
-        data-cy="ErrorNotification"
-        className={classNames(
-          'notification',
-          'is-danger',
-          'is-light',
-          'has-text-weight-normal',
-          { hidden: !showError },
-        )}
-      >
-        <button
-          data-cy="HideErrorButton"
-          type="button"
-          className="delete"
-          onClick={() => {
-            setErrorMessage('');
-            setShowError(false);
-          }}
-        />
-        {errorMessage && (
-          <div
-            data-cy="ErrorNotification"
-            className="notification is-danger is-light has-text-weight-normal"
-          >
-            <button
-              data-cy="HideErrorButton"
-              type="button"
-              className="delete"
-              onClick={() => setErrorMessage('')}
-            />
-            {errorMessage}
-          </div>
-        )}
-      </div>
+      {errorMessage && (
+        <div
+          data-cy="ErrorNotification"
+          className={classNames(
+            'notification',
+            'is-danger',
+            'is-light',
+            'has-text-weight-normal',
+          )}
+        >
+          <button
+            data-cy="HideErrorButton"
+            type="button"
+            className="delete"
+            onClick={hideError}
+          />
+          {errorMessage}
+        </div>
+      )}
     </div>
   );
 };

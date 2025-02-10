@@ -1,13 +1,8 @@
 /* eslint-disable no-console */
 import React from 'react';
 import classNames from 'classnames';
+import FilterStatus from '../enums/FilterStatus';
 import { Todo } from '../types/Todo';
-
-enum FilterStatus {
-  All = 'all',
-  Active = 'active',
-  Completed = 'completed',
-}
 
 interface FooterProps {
   todos: Todo[];
@@ -37,9 +32,6 @@ export const Footer: React.FC<FooterProps> = ({
   ));
 
   const handleClearCompleted = () => {
-    // Add logic to clear completed todos here
-    // This will likely involve calling an API and updating the todos state
-    // For now, let's just log a message
     console.log('Clear completed todos');
   };
 
@@ -49,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({
       className="todoapp__clear-completed"
       data-cy="ClearCompletedButton"
       onClick={handleClearCompleted}
-      disabled={!todos.some(todo => todo.completed)} // Disable if no completed todos
+      disabled={!todos.some(todo => todo.completed)}
     >
       Clear completed
     </button>
