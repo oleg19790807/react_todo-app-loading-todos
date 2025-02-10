@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { getTodos } from './api/todos';
 import { TodoList } from './components/TodoList';
 import { UserWarning } from './UserWarning';
-import { Loader } from './components/Loader';
 import { Todo } from './types/Todo';
 import classNames from 'classnames';
 import { Footer } from './components/Footer';
@@ -34,7 +33,7 @@ export const App: React.FC = () => {
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
     } finally {
-      setTimeout(() => setIsLoading(false), 500);
+      setTimeout(() => setIsLoading(false), 200);
     }
   };
 
@@ -94,8 +93,7 @@ export const App: React.FC = () => {
           </form>
         </header>
         <section className="todoapp__main" data-cy="TodoList">
-          {isLoading && <Loader data-cy="TodoLoader" />}
-          <TodoList todos={filteredTodos} />
+          <TodoList todos={filteredTodos} isLoading={isLoading} />
         </section>
 
         {todos.length > 0 && (
