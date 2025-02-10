@@ -8,16 +8,13 @@ import classNames from 'classnames';
 import { Footer } from './components/Footer';
 import FilterStatus from './enums/FilterStatus';
 
-const USER_ID = 123;
-
-const hideError = () => {
-  setErrorMessage('');
-};
+const USER_ID = 2338;
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showError, setShowError] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>(
     FilterStatus.All,
   );
@@ -25,20 +22,27 @@ export const App: React.FC = () => {
   const loadTodos = async () => {
     setIsLoading(true);
     setErrorMessage('');
+    setShowError(false);
+
     try {
+      await new Promise(resolve => setTimeout(resolve, 200));
       const loadedTodos = await getTodos();
 
       setTodos(loadedTodos);
     } catch (error) {
       setErrorMessage('Unable to load todos');
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
     } finally {
-      setIsLoading(false);
+      setTimeout(() => setIsLoading(false), 500);
     }
   };
 
   useEffect(() => {
     if (USER_ID) {
       loadTodos();
+    } else {
+      setShowError(true);
     }
 
     return () => {
@@ -60,6 +64,11 @@ export const App: React.FC = () => {
   if (!USER_ID) {
     return <UserWarning />;
   }
+
+  const hideError = () => {
+    setErrorMessage('');
+    setShowError(false);
+  };
 
   return (
     <div className="todoapp">
@@ -85,8 +94,10 @@ export const App: React.FC = () => {
           </form>
         </header>
         <section className="todoapp__main" data-cy="TodoList">
-          {isLoading ? <Loader /> : <TodoList todos={filteredTodos} />}
+          {isLoading && <Loader data-cy="TodoLoader" />}
+          <TodoList todos={filteredTodos} />
         </section>
+
         {todos.length > 0 && (
           <Footer
             todos={todos}
@@ -95,25 +106,24 @@ export const App: React.FC = () => {
           />
         )}
       </div>
-      {errorMessage && (
-        <div
-          data-cy="ErrorNotification"
-          className={classNames(
-            'notification',
-            'is-danger',
-            'is-light',
-            'has-text-weight-normal',
-          )}
-        >
-          <button
-            data-cy="HideErrorButton"
-            type="button"
-            className="delete"
-            onClick={hideError}
-          />
-          {errorMessage}
-        </div>
-      )}
+      <div
+        data-cy="ErrorNotification"
+        className={classNames(
+          'notification',
+          'is-danger',
+          'is-light',
+          'has-text-weight-normal',
+          { hidden: !showError },
+        )}
+      >
+        <button
+          data-cy="HideErrorButton"
+          type="button"
+          className="delete"
+          onClick={hideError}
+        />
+        {errorMessage}
+      </div>
     </div>
   );
 };
